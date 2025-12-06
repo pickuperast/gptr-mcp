@@ -283,9 +283,9 @@ def run_server():
 
     # Determine transport based on environment
     transport = os.getenv("MCP_TRANSPORT", "stdio").lower()
-    
-    # Auto-detect Docker environment
-    if os.path.exists("/.dockerenv") or os.getenv("DOCKER_CONTAINER"):
+
+    # Auto-detect Docker environment (only if MCP_TRANSPORT not explicitly set)
+    if (os.path.exists("/.dockerenv") or os.getenv("DOCKER_CONTAINER")) and not os.getenv("MCP_TRANSPORT"):
         transport = "sse"
         logger.info("Docker environment detected, using SSE transport")
     
