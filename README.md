@@ -182,7 +182,7 @@ The GPT Researcher MCP server supports multiple transport protocols and automati
 |-----------|----------|-------------|
 | **STDIO** | Claude Desktop, Local MCP clients | Default for local development |
 | **SSE** | Docker, Web clients, n8n integration | Auto-enabled in Docker |
-| **Streamable HTTP** | Modern web deployments | Advanced web deployments |
+| **Streamable HTTP** | Claude Code CLI, Modern web deployments | For mcp-remote clients and advanced web deployments |
 
 ### Automatic Detection
 
@@ -246,21 +246,45 @@ docker run --name gptr-mcp -p 8000:8000 gptr-mcp
 # In n8n, connect to: http://gptr-mcp:8000/sse
 ```
 
+#### For Claude Code CLI (Docker + mcp-remote)
+```json
+// .claude/.mcp.json or ~/.config/claude-code/mcp_config.json
+{
+  "mcpServers": {
+    "gptr-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:8000/mcp"
+      ]
+    }
+  }
+}
+```
+
+**Requirements:**
+- Docker container must be running with `streamable-http` transport
+- Use `/mcp` endpoint (not `/sse`) for compatibility with `mcp-remote`
+- Set `MCP_TRANSPORT=streamable-http` in `docker-compose.yml`
+
 ### Transport Endpoints
 
 When using SSE or HTTP transports:
 
 - **Health Check**: `GET /health`
 - **SSE Endpoint**: `GET /sse` (get session ID)
+- **MCP Endpoint (Streamable HTTP)**: `POST /mcp` (for mcp-remote clients)
 - **MCP Messages**: `POST /messages/?session_id=YOUR_SESSION_ID`
 
 ### Best Practices
 
 1. **Local Development**: Use default STDIO for Claude Desktop
-2. **Production**: Use Docker with automatic SSE detection
-3. **Testing**: Use health endpoints to verify connectivity
-4. **n8n Integration**: Always use container networking with Docker
-5. **Web Deployment**: Consider Streamable HTTP for modern clients
+2. **Claude Code CLI**: Use Docker with streamable-http transport + mcp-remote
+3. **Production**: Use Docker with automatic SSE detection
+4. **Testing**: Use health endpoints to verify connectivity
+5. **n8n Integration**: Always use container networking with Docker
+6. **Web Deployment**: Consider Streamable HTTP for modern clients
 
 ## Integrating with Claude
 
